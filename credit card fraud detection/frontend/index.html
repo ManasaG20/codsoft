@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Customer Churn Prediction</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        input, select { margin: 5px 0; padding: 5px; width: 200px; }
+        button { padding: 10px 20px; margin-top: 10px; }
+        #result { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Customer Churn Prediction</h1>
+    <form id="churnForm">
+        <label>Credit Score: <input type="number" name="CreditScore" required></label><br>
+        <label>Geography: 
+            <select name="Geography">
+                <option>France</option>
+                <option>Spain</option>
+                <option>Germany</option>
+            </select>
+        </label><br>
+        <label>Gender: 
+            <select name="Gender">
+                <option>Male</option>
+                <option>Female</option>
+            </select>
+        </label><br>
+        <label>Age: <input type="number" name="Age" required></label><br>
+        <label>Tenure: <input type="number" name="Tenure" required></label><br>
+        <label>Balance: <input type="number" name="Balance" step="0.01" required></label><br>
+        <label>Num of Products: <input type="number" name="NumOfProducts" required></label><br>
+        <label>Has Credit Card: 
+            <select name="HasCrCard"><option>1</option><option>0</option></select>
+        </label><br>
+        <label>Is Active Member: 
+            <select name="IsActiveMember"><option>1</option><option>0</option></select>
+        </label><br>
+        <label>Estimated Salary: <input type="number" name="EstimatedSalary" step="0.01" required></label><br>
+        <button type="submit">Predict</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('churnForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const data = {};
+            for (let i = 0; i < form.elements.length; i++) {
+                const el = form.elements[i];
+                if (el.name) data[el.name] = el.value;
+            }
+
+            const res = await fetch('/predict', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            const json = await res.json();
+            document.getElementById('result').innerText = `Prediction: ${json.prediction === 1 ? 'Churn' : 'Stay'}, Probability: ${json.churn_prob}`;
+        });
+    </script>
+</body>
+</html>

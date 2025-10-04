@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SMS Spam Detector</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+
+  <div class="bg-white shadow-lg rounded-2xl p-8 max-w-md w-full">
+    <h1 class="text-2xl font-bold text-center text-indigo-600 mb-6">📩 SMS Spam Detector</h1>
+
+    <textarea id="smsInput" rows="4" placeholder="Enter SMS message..."
+      class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-4"></textarea>
+
+    <button onclick="predictSMS()"
+      class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 transition">
+      Check Message
+    </button>
+
+    <div id="resultBox" class="mt-6 text-center hidden">
+      <p id="prediction" class="text-lg font-semibold"></p>
+      <p id="probability" class="text-sm text-gray-600"></p>
+    </div>
+  </div>
+
+  <script>
+    async function predictSMS() {
+      const sms = document.getElementById("smsInput").value.trim();
+      if (!sms) {
+        alert("Please enter a message!");
+        return;
+      }
+
+      // call backend API (make sure Flask runs on same port or update URL)
+      const response = await fetch("http://127.0.0.1:5000/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: sms })
+      });
+
+      const data = await response.json();
+      console.log(data);
+      document.getElementById("resultBox").classList.remove("hidden");
+      document.getElementById("prediction").textContent =
+        data.label === "spam" ? "🚨 SPAM!" : "✅ Legitimate (Ham)";
+      document.getElementById("prediction").className =
+        data.label === "spam"
+          ? "text-red-600 text-lg font-bold"
+          : "text-green-600 text-lg font-bold";
+
+      if (data.spam_prob !== undefined) {
+        document.getElementById("probability").textContent =
+          `Spam Probability: ${(data.spam_prob * 100).toFixed(2)}%`;
+      }
+    }
+  </script>
+</body>
+</html>
