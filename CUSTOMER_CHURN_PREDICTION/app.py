@@ -6,10 +6,9 @@ import joblib
 app = Flask(__name__, static_folder='frontend', static_url_path='')
 CORS(app)
 
-# Load model
 model = joblib.load("customer_churn_model.joblib")
 
-# Load feature info
+
 df_sample = pd.read_csv("dataset.csv")
 numeric_features = df_sample.select_dtypes(include=['int64','float64']).columns.drop(['Exited','RowNumber','CustomerId']).tolist()
 categorical_features = df_sample.select_dtypes(include=['object']).columns.tolist()
@@ -24,16 +23,16 @@ def predict():
     if not data:
         return jsonify({"error": "No data provided"}), 400
 
-    # Convert to DataFrame
+  
     df_input = pd.DataFrame([data])
-    # Ensure all columns exist
+    
     for col in numeric_features + categorical_features:
         if col not in df_input.columns:
-            df_input[col] = 0  # default value
+            df_input[col] = 0  
 
-    # Predict
+    
     pred = model.predict(df_input)[0]
-    prob = model.predict_proba(df_input)[0][1]  # probability of churn
+    prob = model.predict_proba(df_input)[0][1]  
     return jsonify({"prediction": int(pred), "churn_prob": round(float(prob), 2)})
 
 if __name__ == "__main__":
